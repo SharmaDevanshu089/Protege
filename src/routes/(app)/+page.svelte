@@ -1,156 +1,229 @@
-<script>
-  import { invoke } from "@tauri-apps/api/core";
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import gsap from 'gsap';
+  import { Plus, FolderOpen, Clock, Settings } from 'lucide-svelte';
 
-  let name = $state("");
-  let greetMsg = $state("");
+  let root: HTMLDivElement;
 
-  async function greet(event) {
-    event.preventDefault();
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    greetMsg = await invoke("greet", { name });
-  }
+  onMount(() => {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    tl.from(root, { opacity: 0, y: 20, scale: 0.97, duration: 0.7 })
+      .from('.line', { y: 30, opacity: 0, stagger: 0.12 }, '-=0.4')
+      .from('.action', { y: 20, opacity: 0, stagger: 0.15 }, '-=0.3');
+  });
 </script>
 
-<main class="container">
-  <h1>Welcome to Tauri + Svelte</h1>
+<div bind:this={root} class="stage">
+  <!-- HERO -->
+  <section class="hero">
+    <h1 class="line">Hello.</h1>
+    <h1 class="line accent">I’m Protégé.</h1>
+    <p class="line">
+      I don’t accelerate your typing.  
+      I accelerate your thinking.
+    </p>
+  </section>
 
-  <div class="row">
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-    </a>
-    <a href="https://tauri.app" target="_blank">
-      <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank">
-      <img src="/svelte.svg" class="logo svelte-kit" alt="SvelteKit Logo" />
-    </a>
-  </div>
-  <p>Click on the Tauri, Vite, and SvelteKit logos to learn more.</p>
+  <!-- ACTIONS -->
+  <section class="actions">
+    <button class="action primary">
+      <Plus size="22" />
+      <span>Start new project</span>
+    </button>
 
-  <form class="row" onsubmit={greet}>
-    <input id="greet-input" placeholder="Enter a name..." bind:value={name} />
-    <button type="submit">Greet</button>
-  </form>
-  <p>{greetMsg}</p>
-</main>
+    <button class="action">
+      <FolderOpen size="22" />
+      <span>Open workspace</span>
+    </button>
+
+    <button class="action subtle">
+      <Clock size="18" />
+      <span>Resume last</span>
+    </button>
+  </section>
+
+  <!-- SETTINGS -->
+  <button class="settings">
+    <Settings size="20" />
+  </button>
+</div>
 
 <style>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.svelte-kit:hover {
-  filter: drop-shadow(0 0 2em #ff3e00);
-}
-
-:root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: 0.75s;
-}
-
-.logo.tauri:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-h1 {
-  text-align: center;
-}
-
-input,
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
-  transition: border-color 0.25s;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  border-color: #396cd8;
-}
-button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
-}
-
-input,
-button {
-  outline: none;
-}
-
-#greet-input {
-  margin-right: 5px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #f6f6f6;
-    background-color: transparent;
+  /* ---------- GLOBAL FIXES ---------- */
+  :global(html, body) {
+    height: 100%;
+    margin: 0;
   }
 
-  a:hover {
-    color: #24c8db;
+  :global(body) {
+    background: transparent;
+    color-scheme: dark;
   }
 
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-  button:active {
-    background-color: #0f0f0f69;
-  }
-}
+  /* ---------- LAYOUT ---------- */
+  .stage {
+    height: calc(100vh - 42px); /* below your existing topbar */
+    width: 100vw;
 
+    box-sizing: border-box;
+    padding: 64px 72px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+    position: relative;
+    background: transparent; /* let Mica show */
+  }
+
+  /* ---------- HERO ---------- */
+  .hero h1 {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #f9fafb;
+  }
+
+  .hero p {
+    margin-top: 18px;
+    max-width: 520px;
+    line-height: 1.5;
+    font-size: 1rem;
+    color: #d1d5db;
+  }
+
+  .accent {
+    background: linear-gradient(
+      90deg,
+      #93c5fd,
+      #c4b5fd,
+      #67e8f9
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ---------- ACTIONS ---------- */
+  .actions {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .action {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 16px 22px;
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(12px);
+
+    cursor: pointer;
+
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease,
+      background 0.25s ease;
+  }
+
+  /* LIGHT ICONS — HIGH CONTRAST */
+  .action svg {
+    color: #f9fafb; /* light icons on dark mica */
+  }
+
+  .action span {
+    font-size: 0.95rem;
+    letter-spacing: 0.2px;
+    color: #f3f4f6;
+  }
+
+  /* GLOW LAYER */
+  .action::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      500px circle at 50% 50%,
+      rgba(147, 197, 253, 0.25),
+      transparent 45%
+    );
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .action:hover::after {
+    opacity: 1;
+  }
+
+  .action:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 18px 36px rgba(0,0,0,0.45);
+    background: rgba(255,255,255,0.12);
+  }
+
+  .action.primary {
+    background: linear-gradient(
+      135deg,
+      rgba(147, 197, 253, 0.25),
+      rgba(147, 197, 253, 0.08)
+    );
+    border-color: rgba(147, 197, 253, 0.45);
+  }
+
+  .action.subtle {
+    opacity: 0.85;
+  }
+
+  /* ---------- SETTINGS ---------- */
+  .settings {
+    position: absolute;
+    bottom: 22px;
+    right: 22px;
+
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+
+    transition:
+      transform 0.4s ease,
+      background 0.3s ease;
+  }
+
+  .settings svg {
+    color: #f9fafb; /* light icon */
+  }
+
+  .settings:hover {
+    transform: rotate(30deg) scale(1.1);
+    background: rgba(255,255,255,0.18);
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 720px) {
+    .stage {
+      padding: 36px 32px;
+    }
+
+    .hero h1 {
+      font-size: 2.3rem;
+    }
+  }
 </style>
