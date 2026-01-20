@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import gsap from 'gsap';
   import { Plus, FolderOpen, Clock, Settings } from 'lucide-svelte';
+  import { goto } from '$app/navigation';
 
   let root: HTMLDivElement;
 
@@ -12,6 +13,36 @@
       .from('.line', { y: 30, opacity: 0, stagger: 0.12 }, '-=0.4')
       .from('.action', { y: 20, opacity: 0, stagger: 0.15 }, '-=0.3');
   });
+  async function startNew() {
+  // 1. Create an Exit Timeline
+  const tl = gsap.timeline({
+    onComplete: () => {
+      // 2. ONLY navigate after animation finishes
+      goto('/new'); 
+    }
+  });
+
+  // 3. Define the Exit Animation
+  // "Stagger elements upwards and fade them out"
+  tl.to('.gsap-card', { 
+    y: -40, 
+    opacity: 0, 
+    stagger: 0.1, 
+    duration: 0.4, 
+    ease: 'power2.in' 
+  })
+  .to('.gsap-hero-line', { 
+    y: -30, 
+    opacity: 0, 
+    stagger: 0.05, 
+    duration: 0.4 
+  }, '-=0.3') // Overlap slightly
+  .to('.gsap-header', { 
+    y: -20, 
+    opacity: 0, 
+    duration: 0.3 
+  }, '-=0.3');
+}
 </script>
 
 <div bind:this={root} class="stage">
@@ -27,7 +58,7 @@
 
   <!-- ACTIONS -->
   <section class="actions">
-    <button class="action primary">
+    <button onclick={startNew} class="action primary">
       <Plus size="22" />
       <span>Start new project</span>
     </button>
