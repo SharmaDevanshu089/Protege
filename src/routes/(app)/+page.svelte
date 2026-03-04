@@ -5,6 +5,7 @@
   import { goto } from '$app/navigation';
 
   let root: HTMLDivElement;
+  let isLoading = $state(false);
 
   onMount(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -73,9 +74,15 @@ async function openPage() {
     duration: 0.3 
   }, '-=0.3');
 }
+
+async function resumeLast() {
+  isLoading = true;
+  // Simulating a process (you can replace this with your actual logic)
+  setTimeout(() => { isLoading = false; }, 3000);
+}
 </script>
 
-<div bind:this={root} class="stage">
+<div bind:this={root} class="stage" class:blurred={isLoading}>
   <!-- HERO -->
   <section class="hero">
     <h1 class="line">Hello.</h1>
@@ -98,7 +105,7 @@ async function openPage() {
       <span>Open workspace</span>
     </button>
 
-    <button class="action subtle">
+    <button class="action subtle" onclick={resumeLast}>
       <Clock size="18" />
       <span>Resume last</span>
     </button>
@@ -108,6 +115,12 @@ async function openPage() {
   <button class="settings">
     <Settings size="20" />
   </button>
+
+  {#if isLoading}
+    <div class="loading-overlay">
+      <div class="spinner"></div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -136,6 +149,39 @@ async function openPage() {
 
     position: relative;
     background: transparent; /* let Mica show */
+    transition: filter 0.3s ease;
+  }
+
+  .stage.blurred {
+    filter: blur(8px);
+    pointer-events: none;
+  }
+
+  /* ---------- LOADING OVERLAY ---------- */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - 42px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(147, 197, 253, 0.3);
+    border-radius: 50%;
+    border-top-color: #93c5fd;
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
   /* ---------- HERO ---------- */
