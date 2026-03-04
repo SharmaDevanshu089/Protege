@@ -3,9 +3,7 @@
 
 mod handle_error;
 
-use tauri::Manager;
-use window_vibrancy::apply_mica;
-use windows_registry::*;
+
 fn main() {
     protege_lib::run();
 }

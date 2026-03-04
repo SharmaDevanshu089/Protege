@@ -43,6 +43,36 @@
     duration: 0.3 
   }, '-=0.3');
 }
+async function openPage() {
+  // 1. Create an Exit Timeline
+  const tl = gsap.timeline({
+    onComplete: () => {
+      // 2. ONLY navigate after animation finishes
+      goto('/open'); 
+    }
+  });
+
+  // 3. Define the Exit Animation
+  // "Stagger elements upwards and fade them out"
+  tl.to('.gsap-card', { 
+    y: -40, 
+    opacity: 0, 
+    stagger: 0.1, 
+    duration: 0.4, 
+    ease: 'power2.in' 
+  })
+  .to('.gsap-hero-line', { 
+    y: -30, 
+    opacity: 0, 
+    stagger: 0.05, 
+    duration: 0.4 
+  }, '-=0.3') // Overlap slightly
+  .to('.gsap-header', { 
+    y: -20, 
+    opacity: 0, 
+    duration: 0.3 
+  }, '-=0.3');
+}
 </script>
 
 <div bind:this={root} class="stage">
@@ -63,7 +93,7 @@
       <span>Start new project</span>
     </button>
 
-    <button class="action">
+    <button class="action" onclick={openPage}>
       <FolderOpen size="22" />
       <span>Open workspace</span>
     </button>

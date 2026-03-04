@@ -3,14 +3,50 @@
 use tauri::Manager;
 use window_vibrancy::apply_mica;
 mod handle_error;
+mod resume;
+
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
 // use tauri::Manager; // Required for .app_handle() and .exit()
 use tauri::image::Image;
 
+// Commands that will be exposed via the invoke_handler must be defined in the same
+// crate/module where the handler macro is called. Previously this command lived in
+// `main.rs`, which is a different binary crate – the library build could not see it,
+// leading to the `cannot find macro __cmd__select_vault_folder` error.  Move it here
+// (or import it) so the macro can generate the command registration correctly.
+
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+async fn select_vault_folder(app_handle: tauri::AppHandle) -> String {
+    loop {
+        // 1. Open the dialog
+        let folder = rfd::FileDialog::new()
+            .set_title("Select your Lockr Vault Folder")
+            .pick_folder();
+
+        // 2. Handle the choice
+        match folder {
+            Some(path) => {
+                // User picked a folder!
+                let path_str = path.to_string_lossy().to_string();
+                
+                // Validate if it has protege.toml
+                match resume::load_project_env(path_str.clone()) {
+                    Ok(_) => return path_str,
+                    Err(e) => {
+                        // If error, show dialog and continue the loop
+                        handle_error::create_dialog(app_handle.clone(), &e);
+                        continue;
+                    }
+                }
+            }
+            None => {
+                // User clicked Cancel.
+                // The loop restarts, instantly opening the dialog again.
+                continue;
+            }
+        }
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -77,7 +113,10 @@ pub fn run() {
         })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![
+            select_vault_folder,
+            resume::load_project_env
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
