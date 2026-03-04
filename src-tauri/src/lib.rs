@@ -115,7 +115,8 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             select_vault_folder,
-            resume::load_project_env
+            resume::load_project_env,
+            resume::resume_last_project
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

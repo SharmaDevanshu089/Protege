@@ -3,6 +3,7 @@
   import gsap from 'gsap';
   import { Plus, FolderOpen, Clock, Settings } from 'lucide-svelte';
   import { goto } from '$app/navigation';
+  import { invoke } from '@tauri-apps/api/core';
 
   let root: HTMLDivElement;
   let isLoading = $state(false);
@@ -77,8 +78,13 @@ async function openPage() {
 
 async function resumeLast() {
   isLoading = true;
-  // Simulating a process (you can replace this with your actual logic)
-  setTimeout(() => { isLoading = false; }, 3000);
+  try {
+    await invoke('resume_last_project');
+  } catch (error) {
+    console.error('Failed to resume last project:', error);
+  } finally {
+    isLoading = false;
+  }
 }
 </script>
 

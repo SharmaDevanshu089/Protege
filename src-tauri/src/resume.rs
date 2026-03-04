@@ -1,7 +1,9 @@
+use crate::handle_error;
 use serde::Deserialize;
 use std::env;
 use std::fs;
 use std::path::Path;
+use windows_registry::CURRENT_USER;
 
 #[derive(Deserialize, Debug)]
 struct ProtegeConfig {
@@ -32,5 +34,42 @@ pub fn load_project_env(folder_path: String) -> Result<(), String> {
             Ok(())
         }
         _ => Err("there is a probem with protege config.'.".to_string()),
+    }
+}
+
+#[tauri::command]
+pub fn resume_last_project(app_handle: tauri::AppHandle) {
+    // 1. Try to open the registry key
+    let key_result = CURRENT_USER.open("Software\\Protege");
+
+    match key_result {
+        Ok(key) => {
+            // 2. Try to read the last_project_path string
+            match key.get_string("last_project_path") {
+                Ok(path) => {
+                    // 3. Try to load the environment
+                    match load_project_env(path) {
+                        Ok(_) => {
+                            println!("hello");
+                        }
+                        Err(e) => {
+                            handle_error::create_dialog(app_handle, &e);
+                        }
+                    }
+                }
+                Err(_) => {
+                    handle_error::create_dialog(
+                        app_handle,
+                        "Could not find 'last_project_path' in registry.(ERR_REG_NOT_FOUND)",
+                    );
+                }
+            }
+        }
+        Err(_) => {
+            handle_error::create_dialog(
+                app_handle,
+                "Could not fetch last project. (ERR_REG_NOT_RETURN)",
+            );
+        }
     }
 }
