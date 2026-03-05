@@ -1,20 +1,10 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-
 use tauri::Manager;
 use window_vibrancy::apply_mica;
 mod handle_error;
 mod resume;
-
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
-// use tauri::Manager; // Required for .app_handle() and .exit()
 use tauri::image::Image;
-
-// Commands that will be exposed via the invoke_handler must be defined in the same
-// crate/module where the handler macro is called. Previously this command lived in
-// `main.rs`, which is a different binary crate – the library build could not see it,
-// leading to the `cannot find macro __cmd__select_vault_folder` error.  Move it here
-// (or import it) so the macro can generate the command registration correctly.
 
 #[tauri::command]
 async fn select_vault_folder(app_handle: tauri::AppHandle) -> String {
